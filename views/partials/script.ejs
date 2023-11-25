@@ -1,0 +1,93 @@
+<script>
+    window.onload = function () {
+        document.getElementById('userpfp').addEventListener('click', function (e) {
+            alert('User profile page not available yet!\nPlease check back soon!');
+        });
+
+        const searchInput = document.getElementById('search');
+        var data;
+        searchInput.addEventListener('keydown', async function (event) {
+            if (event.key == 'Enter') {
+                const searchTerm = searchInput.value.trim();
+                if (searchTerm === '') {
+                    alert('Please enter a value to search for.');
+                }
+                else {
+                    try {
+                        const response = await fetch(`/search?term=${searchTerm}`);
+                        data = await response.json();
+                        console.log('songId:', data)
+                        if (!data || !data.title || !data.artist || data.duration === undefined) {
+                            alert(`No matching song found for "${searchTerm}"`);
+                        }
+                        else if (data.error) {
+                            alert(data.error);
+                        }
+                        else {
+                            const confirmation = window.confirm(
+                                `Song found!\nName: ${data.title}\nArtist: ${data.artist}\nDuration: ${data.duration} seconds\nID: ${data._id}\nDo you want to add this song to the current playlist?`
+                            );
+
+                            const songId = data.title;
+
+                            if (confirmation) {
+                                try {
+                                    const response = await fetch('/addToPlaylist', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            songId: data._id,
+                                        }),
+                                    });
+
+                                    if (response.ok) {
+                                        const result = await response.json();
+                                        alert(result.message);
+                                        location.reload();
+                                    } 
+                                    else {
+                                        const result = await response.json();
+                                        alert(`Error: ${result.message}`);
+                                    }
+                                }
+                                catch (error) {
+                                    console.error('Error adding song to playlist:', error);
+                                }
+                            }
+                        }
+                    }
+                    catch (error) {
+                        console.error('Error fetching data:', error);
+                    }
+                }
+            }
+        });
+
+
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Fetch a random DJ
+        fetch('/getRandomDJ')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Data received:', data); // Add this line for debugging
+
+                if (data && data.name) {
+                    const dj = data;
+
+                    const djName = document.getElementById("djName");
+                    djName.textContent = "Current DJ: " + dj.name;
+                }
+                else {
+                    console.error('Error fetching random DJ:', data);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching random DJ:', error);
+            });
+    });
+
+</script>

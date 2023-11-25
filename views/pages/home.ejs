@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Home</title>
+    <%- include('../partials/head'); %>
+        <style>
+            body {
+                display: flex;
+                flex-direction: column;
+                background-color: lightgray;
+                font-family: "Montserrat", serif;
+            }
+
+            /* Add these styles to your existing CSS or create a new style tag in your EJS file */
+            .scrollcontainer {
+                display: flex;
+                overflow-x: scroll;
+                white-space: nowrap;
+            }
+
+            .songCard {
+                margin-right: 15px;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #fff;
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+                /* Set a fixed height for each song card */
+                height: 120px;
+                /* Adjust width based on screen size with a minimum width */
+                min-width: 200px;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .songInfo {
+                text-align: center;
+            }
+
+            /* Ensure that text within songInfo stays within the card */
+            .artistName {
+                overflow: hidden;
+                text-overflow: clip;
+            }
+
+            .songTitle {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: pre-wrap;
+                word-break: break-all;
+            }
+
+            /* Adjust these styles to handle long artist names */
+            .artistName {
+                white-space: nowrap;
+            }
+
+            /* Display full artist name on hover */
+            .artistName:hover::before {
+                content: attr(title);
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: #fff;
+                padding: 5px;
+                border: 1px solid #ddd;
+                border-top: none;
+                z-index: 1;
+                text-align: center;
+            }
+
+            /* Media query for smaller screens */
+            @media screen and (max-width: 600px) {
+                .songCard {
+                    min-width: 150px;
+                    /* Adjust minimum width for smaller screens */
+                }
+            }
+
+            /* Media query for even smaller screens */
+            @media screen and (max-width: 400px) {
+                .songCard {
+                    min-width: 120px;
+                    /* Adjust minimum width for even smaller screens */
+                }
+            }
+        </style>
+        <%- include('../partials/script'); %>
+</head>
+
+<body>
+
+    <%- include('../partials/header'); %>
+
+        <div class="upcomingsongs">
+            <h2>Upcoming Songs:</h2>
+            <div class="scrollcontainer" id="songContainer">
+
+            </div>
+            <br>
+            <h2>Upcoming Playlists:</h2>
+            <div class="scrollcontainer" id="playlistContainer">
+
+            </div>
+        </div>
+
+        <%- include('../partials/footer', { songId: songId }); %>
+            <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+            <script src="script.js"></script>
+            <%- include('../partials/script'); %>
+                <script>
+                    // Fetch all songs and populate the song container
+                    $(document).ready(function () {
+                        $.ajax({
+                            url: '/getAllSongs',
+                            method: 'GET',
+                            success: function (data) {
+                                if (data && data.length > 0) {
+                                    const songContainer = $('#songContainer');
+                                    // Clear the container before adding new songs
+                                    songContainer.empty();
+
+                                    data.forEach(song => {
+                                        const songCard = $('<div>').addClass('songCard');
+                                        const songInfo = $('<div>').addClass('songInfo');
+                                        const songTitle = $('<h3>').text(song.title);
+                                        //const artistName = $('<p>').text(song.artist);
+                                        const artistName = $('<p>')
+                                            .text(song.artist)
+                                            .attr('title', song.artist);
+
+                                        songInfo.append(songTitle, artistName);
+                                        songCard.append(songInfo);
+
+                                        songContainer.append(songCard);
+                                    });
+                                }
+                                else {
+                                    console.error('No songs found.');
+                                }
+                            },
+                            error: function (error) {
+                                console.error('Error fetching songs:', error);
+                            }
+                        });
+                    });
+
+                    $(document).ready(function () {
+                        $.ajax({
+                            url: '/getAllPlaylists',
+                            method: 'GET',
+                            success: function (data) {
+                            if (data && data.length > 0) {
+                                const playlistContainer = $('#playlistContainer');
+                                playlistContainer.empty();
+
+                                data.forEach(playlist => {
+                                    const playlistCard = $('<div>').addClass('songCard');
+                                    const playlistInfo = $('<div>').addClass('songInfo');
+                                    const playlistTitle = $('<h3>').text(playlist.name);
+                                    const playlistDescription = $('<p>').text(playlist.description);
+
+                                // Click event on playlist card
+                            playlistCard.on('click', function() {
+                                const confirmation = confirm(`Set "${playlist.name}" as your working playlist?`);
+                                if (confirmation) {
+                                // AJAX request to update user's workingPlaylist
+                                    $.ajax({
+                                        url: '/setWorkingPlaylist',
+                                        method: 'POST',
+                                        data: { playlistId: playlist._id }, // Send playlist ID to server
+                                        success: function(response) {
+                                            alert(response.message);
+                                            // Handle success response if needed
+                                        },
+                                        error: function(error) {
+                                            console.error('Error setting working playlist:', error);
+                                        }
+                                    });
+                                }
+                            });
+
+                            playlistInfo.append(playlistTitle, playlistDescription);
+                            playlistCard.append(playlistInfo);
+                            playlistContainer.append(playlistCard);
+                            });
+                            } else {
+                                console.error('No playlists found.');
+                            }
+                            },
+                            error: function (error) {
+                                console.error('Error fetching playlists:', error);
+                            }
+                        });
+                    });
+                </script>
+</body>
+
+</html>

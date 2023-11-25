@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Settings</title>
+    <%- include('../partials/head'); %>
+    <%- include('../partials/script'); %>
+</head>
+
+<body>
+    <%- include('../partials/header'); %>
+
+    <div class="upcomingsongs">
+        <h2>Change Password</h2>
+        <form id="changePasswordForm">
+            <label for="oldPassword">Old Password:</label>
+            <input type="password" id="oldPassword" name="oldPassword" required>
+    
+            <label for="newPassword">New Password:</label>
+            <input type="password" id="newPassword" name="newPassword" required>
+    
+            <button type="submit">Change Password</button>
+        </form>
+    </div>
+
+    <%- include('../partials/footer', { songId: songId }); %>
+</body>
+
+</html>

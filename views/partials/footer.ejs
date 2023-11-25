@@ -1,0 +1,116 @@
+<div class="bottomheader">
+    <header class="bottom-banner">
+        <div class="songdetails">
+            <div class="albumimage">
+                <img src="https://raw.githubusercontent.com/edtton/RadioStation/main/template.jpg">
+            </div>
+            <div class="songinfo">
+                <h2 id="songTitle">loading</h2>
+                <h4 id="artistName">loading</h4>
+                <p id="albumName">loading</p>
+            </div>
+        </div>
+
+        <div class="songcontrols">
+            <div class="songlabels">
+                <p class="left">Live Radio</p>
+                <p class="right" id="djName"></p>
+            </div>
+            <div class="player">
+                <audio controls id="radioPlayer">
+                    <source src="https://playerservices.streamtheworld.com/api/livestream-redirect/WETAFM.mp3"
+                        type=audio/mpeg>
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        </div>
+
+        <div class="songactions">
+            <button class="songaction" id="queueadd" onclick="addPlaylist()">Add to Playlist</button>
+            <button class="songaction" id="queueremove" onclick="removePlaylist()">Remove from
+                Playlist</button>
+        </div>
+    </header>
+</div>
+
+<script>
+    let currentSongId;
+
+    console.log('Before DOMContentLoaded event listener');
+    document.addEventListener('DOMContentLoaded', async function () {
+        
+            console.log('songId:',currentSongId)
+            const response = await fetch('/getRandomSong');
+            const data = await response.json();
+            console.log('Random Song:', data); // Debug statement
+            if (data && data.name && data.artist) {
+                // Update the content of the songinfo div
+                document.getElementById('songTitle').textContent = data.title;
+                document.getElementById('artistName').textContent = data.artist;
+                document.getElementById('albumName').textContent = data.album || '';
+
+                currentSongId = data._id;
+            }
+            else {
+                console.error('Error fetching random song:', data);
+            }
+    });
+
+    function addPlaylist() {
+        // Now, send the current song's ID to the server
+        fetch('/addToPlaylist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ songId: currentSongId }),  // Use 'songId' as the key
+        })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                    return response.json();
+                } 
+                else {
+                    return response.json().then(error => Promise.reject(error));
+                }
+            })
+            .then(data => {
+                console.log(data.message);
+                alert(data.message); // Display a message to the user
+            })
+            .catch(error => {
+                console.error('Error adding to playlist:', error);
+                alert(`Error: ${error.message}`); // Display an error message to the user
+            });
+            
+    }
+
+    function removePlaylist() {
+        // Now, send the current song's ID to the server
+        fetch('/removeFromPlaylist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ songId: currentSongId }),  // Use 'songId' as the key
+        })
+            .then(response => {
+                if (response.ok) {
+                    // location.reload();
+                    return response.json();
+                } 
+                else {
+                    return response.json().then(error => Promise.reject(error));
+                }
+            })
+            .then(data => {
+                console.log(data.message);
+                alert(data.message); // Display a message to the user
+            })
+            .catch(error => {
+                console.error('Error removing song from playlist:', error);
+                alert(`Error: ${error.message}`); // Display an error message to the user
+            });
+            
+    }
+</script>

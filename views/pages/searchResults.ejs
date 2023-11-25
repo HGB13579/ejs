@@ -1,0 +1,11 @@
+<!-- searchResults.ejs -->
+<div class="search-results">
+    <% results.forEach(result => { %>
+        <div class="result-item">
+            <!-- Display relevant information from the search result -->
+            <p>Name: <%= result.name %></p>
+            <p>Artist: <%= result.artist %></p>
+            <p>Duration: <%= result.duration %> seconds</p>
+        </div>
+    <% }); %>
+</div>

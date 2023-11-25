@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Profile</title>
+    <%- include('../partials/head'); %>
+    <%- include('../partials/script'); %>
+</head>
+
+<body>
+    <%- include('../partials/header'); %>
+
+    <% if (username) { %>
+        <div class="upcomingsongs">
+          <p>Welcome, <%= username %>!</p>
+          <form action="/logout" method="get">
+            <button type="submit">Logout</button>
+          </form>
+        </div>
+      <% } else { %>
+        <div class="upcomingsongs">
+          <p>Please <a href="/login">login</a> to view your profile.</p>
+        </div>
+      <% } %>
+
+      <%- include('../partials/footer', { songId: songId }); %>
+</body>
+
+</html>
